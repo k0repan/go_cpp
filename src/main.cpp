@@ -1,5 +1,7 @@
-#include <stdio.h>
+#include <iostream>
 
-int main(){
-    printf("This is Go game project\n");
+int main(int argc, char* argv[]) {
+    std::cout << "Hello, Go!" << std::endl;
+
+    return 0;
 }

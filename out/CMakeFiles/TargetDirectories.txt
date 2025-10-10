@@ -1,0 +1,3 @@
+D:/Projects/C++/go_cpp/out/CMakeFiles/Go.dir
+D:/Projects/C++/go_cpp/out/CMakeFiles/edit_cache.dir
+D:/Projects/C++/go_cpp/out/CMakeFiles/rebuild_cache.dir
