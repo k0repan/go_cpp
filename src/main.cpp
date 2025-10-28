@@ -1,7 +1,9 @@
 #include "board.h"
 
 int main(){
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT + ADD_SCREEN_HEIGHT, "GoCPP");
+    InitWindow(BOARD_WIDTH,
+        BOARD_HEIGHT + 2 * LETTERS_CELL_HEIGHT + ADD_SCREEN_HEIGHT,
+        "GoCPP");
     SetTargetFPS(FPS);
 
     Board mainBoard;
@@ -11,6 +13,7 @@ int main(){
         ClearBackground(WHITE);
 
         mainBoard.drawBoard();
+        mainBoard.drawTiles();
 
         EndDrawing();
     }
