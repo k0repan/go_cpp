@@ -1,6 +1,20 @@
-#include <stdio.h>
-#include "raylib.h"
+#include "board.h"
 
 int main(){
-    printf("This is Go game project\n");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT + ADD_SCREEN_HEIGHT, "GoCPP");
+    SetTargetFPS(FPS);
+
+    Board mainBoard;
+
+    while(!WindowShouldClose()){
+        BeginDrawing();
+        ClearBackground(WHITE);
+
+        mainBoard.drawBoard();
+
+        EndDrawing();
+    }
+
+    CloseWindow();
+    return 0;
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.34)
 
-set(PROJECT_NAME "Go")
+set(PROJECT_NAME Go)
 project(${PROJECT_NAME} VERSION 0.1)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -24,10 +24,13 @@ if (NOT ${LIB_NAME}_FOUND)
     message(STATUS "Getting ${LIB_NAME} from GitHub...")
     includeDependency(${LIB_NAME} https://github.com/raysan5/raylib.git 5.5)
 else()
-    message(STATUS "Using local ${LIB}")
+    message(STATUS "Using local ${LIB_NAME}")
 endif()
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME}
+        src/main.cpp
+        src/board.cpp
+)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LIB})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LIB_NAME})
