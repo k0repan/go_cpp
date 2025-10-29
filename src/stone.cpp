@@ -1,8 +1,12 @@
 #include "stone.h"
 
 
-void Stone::dragAtCursor(const int x, const int y) const {
-    const float centerX = static_cast<float>(texture.width) / 2.0f,
-        centerY = static_cast<float>(texture.height) / 2.0f;
-    DrawTextureV(texture, {x - centerX, y - centerY}, WHITE);
+void Stone::dragAtCursor(const float x, const float y) const {
+    constexpr float center = static_cast<float>(textureWidth) / 2.0f;
+    DrawTextureV(texture, {x - center, y - center}, WHITE);
+}
+
+void Stone::drawStone() const {
+    const float scaleFigureToCell = static_cast<float>(CELL_SPACE) / static_cast<float>(textureWidth);
+    DrawTextureEx(texture, {x, y}, 0, scaleFigureToCell, WHITE);
 }

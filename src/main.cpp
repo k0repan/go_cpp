@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "board.h"
 #define filenameIcon "../textures/go_cpp_icon.png"
 
@@ -8,74 +10,71 @@ bool isValidMoveOnBoard(const float x, const float y) {
         currentXY.second >= 0 && currentXY.second < CELLS_QUANT;
 }
 
-// Convert figure position to screen coords
+// Convert stone position to screen coords
 inline Vector2 getPosXYIntToFloat(const int x, const int y) {
     return {static_cast<float>(x * CELL_SPACE + NUMBERS_CELL_WIDTH), static_cast<float>(y * CELL_SPACE + LETTERS_CELL_HEIGHT)};
 }
 
-// Convert mouse pos to cell position
-inline Vector2Int getMousePosOnBoardXY(const Vector2 &mousePos) {
-    return {static_cast<int>(mousePos.x - NUMBERS_CELL_WIDTH) / CELL_SPACE, static_cast<int>(mousePos.y - LETTERS_CELL_HEIGHT) / CELL_SPACE};
+// Convert mouse pos to board point
+Vector2Int getBoardPositionFromMouse(const Vector2& mousePos) {
+    int col = static_cast<int>((mousePos.x - NUMBERS_CELL_WIDTH + CELL_SPACE / 2) / CELL_SPACE),
+    row = static_cast<int>((mousePos.y - LETTERS_CELL_HEIGHT + CELL_SPACE / 2) / CELL_SPACE);
+
+    return {col, row};
 }
 
-Vector2Int dragStoneCurrentPos {};
+Vector2 dragStoneCurrentPos {};
 
-// Captured figure
-void startDragFigures(Board& board, const Vector2& mousePos) {
-    const Vector2Int xy = getMousePosOnBoardXY(mousePos);
-
-    if (board.board[xy.second][xy.first]) {
+// Captured stone from bowl
+void startDragStones(Board& board, const Vector2& mousePos) {
+    if (mousePos.x >= whiteBowlPos.x - CELL_SPACE / 2 && mousePos.x <= whiteBowlPos.x + CELL_SPACE
+        && mousePos.y >= whiteBowlPos.y - CELL_SPACE / 2 && mousePos.y <= whiteBowlPos.y + CELL_SPACE) {
         board.isStoneDragging = true;
-        board.dragStonePos = xy;
     }
 }
 
 // Dynamic drag figure on screen
-void updateDragFigures(const Board& board, const Vector2& mousePos) {
-    if (board.isStoneDragging) {
-        dragStoneCurrentPos = getMousePosOnBoardXY(mousePos);
+void updateDragStones(Board& board, const Vector2& mousePos) {
+    if (board.isStoneDragging && !board.whiteBowl.empty()) {
+        dragStoneCurrentPos = mousePos;
+        board.whiteBowl.top()->dragAtCursor(mousePos.x, mousePos.y);
 
-        const Stone* stonePtr = board.board[board.dragStonePos.second][board.dragStonePos.first].get();
-        if (stonePtr) {
-            stonePtr->dragAtCursor(mousePos.x, mousePos.y);
-        }
+        Vector2Int boardPos = getBoardPositionFromMouse(mousePos);
+        // std::cout << "Dragging over board position: " << boardPos.first << ", " << boardPos.second << std::endl;
     }
 }
 
-// Stand figure on end mouse pos
-void endDragFigures(Board& board) {
+// Stand stone on end mouse pos
+void endDragStones(Board& board) {
     if (board.isStoneDragging) {
-        const int newCol = dragStoneCurrentPos.first;
-        const int newRow = dragStoneCurrentPos.second;
+        const Vector2Int boardPos = getBoardPositionFromMouse(dragStoneCurrentPos);
+        const int newCol = boardPos.first;
+        const int newRow = boardPos.second;
         const Vector2 newStoneXY = getPosXYIntToFloat(newCol, newRow);
 
-        if (isValidMoveOnBoard(newStoneXY.x, newStoneXY.y) && dragStoneCurrentPos != board.dragStonePos) {
-            Stone* figurePtr = board.board[board.dragStonePos.second][board.dragStonePos.first].get();
-
-            if (figurePtr) {
-                /*const int moveStatus = board.moveFigureOnBoard(*figurePtr, newCol, newRow);
-                if (moveStatus == 0){
-                    figurePtr->moveFigure(newFigXY.x, newFigXY.y);
-                    std::cout << board.getBoardStatus() << std::endl;
-                }*/
+        if (isValidMoveOnBoard(newStoneXY.x, newStoneXY.y) &&
+            !board.whiteBowl.empty()) {
+            const int setStatus = board.setStoneOnBoard(newCol, newRow);
+            if (setStatus == -1) {
+                std::cout << "Error occurred!" << std::endl;
             }
         }
-        // board.turnBackFigure();
+        board.turnBackStone();
     }
 }
 
-void DragFigures(const Vector2& mousePos, Board& board) {
+void DragStones(const Vector2& mousePos, Board& board) {
     if (!board.isStoneDragging) {
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && isValidMoveOnBoard(mousePos.x, mousePos.y)) {
-            startDragFigures(board, mousePos);
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            startDragStones(board, mousePos);
         }
     } else {
-        updateDragFigures(board, mousePos);
+        updateDragStones(board, mousePos);
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            endDragFigures(board);
+            endDragStones(board);
         } if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-            // board.turnBackFigure();
+            board.turnBackStone();
         }
     }
 }
@@ -91,6 +90,7 @@ int main(){
     SetWindowIcon(LoadImage(filenameIcon));
 
     Board mainBoard;
+    mainBoard.initBowls();
 
     while(!WindowShouldClose()){
         mousePosition = GetMousePosition();
@@ -98,8 +98,9 @@ int main(){
 
         mainBoard.drawBoard();
         mainBoard.drawBowls();
+        mainBoard.drawStones();
 
-        DragFigures(mousePosition, mainBoard);
+        DragStones(mousePosition, mainBoard);
 
         ClearBackground(RAYWHITE);
         EndDrawing();

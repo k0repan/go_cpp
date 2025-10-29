@@ -9,34 +9,58 @@ Vector2Int getPosXYFloatToInt(const float x, const float y) {
 }
 
 
-void Board::setStoneOnBoard(Stone &t, const Vector2Int &toXY) {
-    t.x = toXY.first;
-    t.y = toXY.second;
-    board[toXY.second][toXY.first] = std::make_unique<Stone>(t);
+int Board::setStoneOnBoard(const int col, const int row) {
+    if (whiteBowl.empty() || board[row][col]) return -1;
+
+    auto stone = std::move(whiteBowl.top());
+    whiteBowl.pop();
+
+    stone->x = NUMBERS_CELL_WIDTH + col * CELL_SPACE - CELL_SPACE / 2;
+    stone->y = LETTERS_CELL_HEIGHT + row * CELL_SPACE - 10;
+
+    board[row][col] = std::move(stone);
+
+    std::cout << "Stone placed at: " << col << ", " << row << std::endl;
     // Make check for liberties
+    return 1;
 }
 
-
 void Board::drawBowls() const {
-    constexpr int indent { 100 };
-    constexpr int spaceDownTheBoard { CELL_SPACE * 2 };
-
     constexpr float scaleFigureToCell = CELL_SPACE / coefCompression / static_cast<float>(textureWidth);
     // White bowl
     DrawTextureEx(bowlWStone,
-        {indent - 7, BOARD_HEIGHT + spaceDownTheBoard - 9},
+        {whiteBowlPos.x - 7, whiteBowlPos.y - 9},
         0, scaleFigureToCell, WHITE);
-    DrawText(std::to_string(whiteStones.size()).c_str(),
-        indent, BOARD_HEIGHT + spaceDownTheBoard, 16, BLACK);
+    DrawText(std::to_string(whiteBowl.size()).c_str(),
+        whiteBowlPos.x + 7, whiteBowlPos.y + 7, 16, BLACK);
 
     // Black bowl
     DrawTextureEx(bowlBStone,
-        {BOARD_WIDTH - indent - 7, BOARD_HEIGHT + spaceDownTheBoard - 9},
+        { blackBowlPos.x - 7, blackBowlPos.y - 9},
         0, scaleFigureToCell, WHITE);
-    DrawText(std::to_string(blackStones.size()).c_str(),
-        BOARD_WIDTH - indent, BOARD_HEIGHT + spaceDownTheBoard, 16, WHITE);
+    DrawText(std::to_string(blackBowl.size()).c_str(),
+        blackBowlPos.x + 7, blackBowlPos.y + 7, 16, WHITE);
 }
 
+void Board::drawStones() const {
+    for (int i = 0; i < CELLS_QUANT; ++i) {
+        for (int j = 0; j < CELLS_QUANT; ++j) {
+            if (board[i][j]) {
+                board[i][j]->drawStone();
+            }
+        }
+    }
+}
+
+
+void Board::initBowls() {
+    for (int i = 0; i < WHITE_STONES_QUANT; ++i) {
+        whiteBowl.push(std::make_unique<Stone>(Stone(false, whiteBowlPos.x, whiteBowlPos.y)));
+    }
+    for (int i = 0; i < BLACK_STONES_QUANT; ++i) {
+        blackBowl.push(std::make_unique<Stone>(Stone(true, blackBowlPos.x, blackBowlPos.y)));
+    }
+}
 
 void Board::drawBoard() const {
     // Background
