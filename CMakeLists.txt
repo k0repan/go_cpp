@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.34)
+cmake_minimum_required(VERSION 3.31)
 
 set(PROJECT_NAME Go)
 project(${PROJECT_NAME} VERSION 0.1)
@@ -30,7 +30,8 @@ endif()
 add_executable(${PROJECT_NAME}
         src/main.cpp
         src/board.cpp
-        src/Tile.h
+        src/board.h
+        src/Stone.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS})
