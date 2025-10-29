@@ -30,17 +30,29 @@ void startDragStones(Board& board, const Vector2& mousePos) {
     if (mousePos.x >= whiteBowlPos.x - CELL_SPACE / 2 && mousePos.x <= whiteBowlPos.x + CELL_SPACE
         && mousePos.y >= whiteBowlPos.y - CELL_SPACE / 2 && mousePos.y <= whiteBowlPos.y + CELL_SPACE) {
         board.isStoneDragging = true;
+        board.isWhiteActive = true;
+    }
+    if (mousePos.x >= blackBowlPos.x - CELL_SPACE / 2 && mousePos.x <= blackBowlPos.x + CELL_SPACE
+        && mousePos.y >= blackBowlPos.y - CELL_SPACE / 2 && mousePos.y <= blackBowlPos.y + CELL_SPACE) {
+        board.isStoneDragging = true;
+        board.isWhiteActive = false;
     }
 }
 
 // Dynamic drag figure on screen
 void updateDragStones(Board& board, const Vector2& mousePos) {
-    if (board.isStoneDragging && !board.whiteBowl.empty()) {
-        dragStoneCurrentPos = mousePos;
-        board.whiteBowl.top()->dragAtCursor(mousePos.x, mousePos.y);
-
-        Vector2Int boardPos = getBoardPositionFromMouse(mousePos);
-        // std::cout << "Dragging over board position: " << boardPos.first << ", " << boardPos.second << std::endl;
+    if (board.isStoneDragging) {
+        if (board.isWhiteActive) {
+            if (!board.whiteBowl.empty()) {
+               dragStoneCurrentPos = mousePos;
+               board.whiteBowl.top()->dragAtCursor(mousePos.x, mousePos.y);
+            }
+        } else {
+            if (!board.blackBowl.empty()) {
+                dragStoneCurrentPos = mousePos;
+                board.blackBowl.top()->dragAtCursor(mousePos.x, mousePos.y);
+            }
+        }
     }
 }
 
@@ -52,8 +64,7 @@ void endDragStones(Board& board) {
         const int newRow = boardPos.second;
         const Vector2 newStoneXY = getPosXYIntToFloat(newCol, newRow);
 
-        if (isValidMoveOnBoard(newStoneXY.x, newStoneXY.y) &&
-            !board.whiteBowl.empty()) {
+        if (isValidMoveOnBoard(newStoneXY.x, newStoneXY.y)) {
             const int setStatus = board.setStoneOnBoard(newCol, newRow);
             if (setStatus == -1) {
                 std::cout << "Error occurred!" << std::endl;

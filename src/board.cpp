@@ -10,10 +10,17 @@ Vector2Int getPosXYFloatToInt(const float x, const float y) {
 
 
 int Board::setStoneOnBoard(const int col, const int row) {
-    if (whiteBowl.empty() || board[row][col]) return -1;
+    if (whiteBowl.empty() || blackBowl.empty() || board[row][col]) return -1;
+    std::remove_reference<std::unique_ptr<Stone> &>::type stone;
 
-    auto stone = std::move(whiteBowl.top());
-    whiteBowl.pop();
+    if (isWhiteActive) {
+        stone = std::move(whiteBowl.top());
+        whiteBowl.pop();
+    } else {
+        stone = std::move(blackBowl.top());
+        blackBowl.pop();
+    }
+
 
     stone->x = NUMBERS_CELL_WIDTH + col * CELL_SPACE - CELL_SPACE / 2;
     stone->y = LETTERS_CELL_HEIGHT + row * CELL_SPACE - 10;

@@ -36,6 +36,7 @@ inline Texture2D bowlWStone;
 class Board {
     public:
         bool isStoneDragging { false };
+        bool isWhiteActive { false };
         void initBowls();
         void drawBoard() const;
         void drawBowls() const;
