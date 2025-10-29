@@ -31,7 +31,8 @@ add_executable(${PROJECT_NAME}
         src/main.cpp
         src/board.cpp
         src/board.h
-        src/Stone.h
+        src/stone.h
+        src/stone.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${raylib_INCLUDE_DIRS})

@@ -3,24 +3,45 @@
 #include <vector>
 
 
-void Board::setTileOnBoard(Stone &t, const Vector2Int &xy) {
-    t.x = xy.first;
-    t.y = xy.second;
-    if (t.isBlack) {
-        whiteStones[0] = std::make_unique<Stone>(t);
-    }else {
-        blackStones[0] = std::make_unique<Stone>(t);
-    }
+// Convert coords to cell position
+Vector2Int getPosXYFloatToInt(const float x, const float y) {
+    return {(x - NUMBERS_CELL_WIDTH) / CELL_SPACE, (y - LETTERS_CELL_HEIGHT) / CELL_SPACE};
 }
 
 
-void Board::drawTiles() const {
-    DrawText(std::to_string(whiteStones.size()).c_str(), 100, BOARD_HEIGHT + CELL_SPACE, 16, BLACK);
-    DrawText(std::to_string(blackStones.size()).c_str(), BOARD_WIDTH - 100, BOARD_HEIGHT + CELL_SPACE, 16, BLACK);
+void Board::setStoneOnBoard(Stone &t, const Vector2Int &toXY) {
+    t.x = toXY.first;
+    t.y = toXY.second;
+    board[toXY.second][toXY.first] = std::make_unique<Stone>(t);
+    // Make check for liberties
+}
+
+
+void Board::drawBowls() const {
+    constexpr int indent { 100 };
+    constexpr int spaceDownTheBoard { CELL_SPACE * 2 };
+
+    constexpr float scaleFigureToCell = CELL_SPACE / coefCompression / static_cast<float>(textureWidth);
+    // White bowl
+    DrawTextureEx(bowlWStone,
+        {indent - 7, BOARD_HEIGHT + spaceDownTheBoard - 9},
+        0, scaleFigureToCell, WHITE);
+    DrawText(std::to_string(whiteStones.size()).c_str(),
+        indent, BOARD_HEIGHT + spaceDownTheBoard, 16, BLACK);
+
+    // Black bowl
+    DrawTextureEx(bowlBStone,
+        {BOARD_WIDTH - indent - 7, BOARD_HEIGHT + spaceDownTheBoard - 9},
+        0, scaleFigureToCell, WHITE);
+    DrawText(std::to_string(blackStones.size()).c_str(),
+        BOARD_WIDTH - indent, BOARD_HEIGHT + spaceDownTheBoard, 16, WHITE);
 }
 
 
 void Board::drawBoard() const {
+    // Background
+    DrawRectangle(0, 0, BOARD_WIDTH, BOARD_HEIGHT + ADD_SCREEN_HEIGHT, BACKGROUND_COLOR);
+
     int x = 0;
     int startPos = 0;
     bool first = true;
